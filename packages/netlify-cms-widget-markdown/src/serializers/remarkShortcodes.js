@@ -10,38 +10,57 @@ export function remarkParseShortcodes({ plugins }) {
 
 function createShortcodeTokenizer({ plugins }) {
   return function tokenizeShortcode(eat, value, silent) {
-    let match;
-    const potentialMatchValue = value.split('\n\n')[0].trimEnd();
-    const plugin = plugins.find(plugin => {
-      match = value.match(plugin.pattern);
+    const initialValue = value;
+    const matches = [];
+    plugins.forEach((plugin) => {
+      const potentialMatchValue = initialValue.split('\n\n')[0].trimEnd();
+      let match;
+      if (typeof plugin.pattern === 'function') {
+        match = plugin.pattern(initialValue);
+        if (!match) {
+          match = plugin.pattern(potentialMatchValue);
+        }
+      } else { //assume regex
+        match = initialValue.match(plugin.pattern);
 
-      if (!match) {
-        match = potentialMatchValue.match(plugin.pattern);
+        if (!match) {
+          match = potentialMatchValue.match(plugin.pattern);
+        }
       }
-
-      return !!match;
-    });
-
-    if (match) {
-      if (silent) {
-        return true;
-      }
-
-      const shortcodeData = plugin.fromBlock(match);
-
-      try {
-        return eat(match[0])({
-          type: 'shortcode',
-          data: { shortcode: plugin.id, shortcodeData },
+      if (match) {
+        matches.push({
+          match,
+          plugin
         });
-      } catch (e) {
-        console.warn(
-          `Sent invalid data to remark. Plugin: ${plugin.id}. Value: ${
-            match[0]
-          }. Data: ${JSON.stringify(shortcodeData)}`,
-        );
-        return false;
       }
+    });
+    if (matches.length > 0) {
+      matches.forEach(({ match, plugin }) => {
+        if (match) {
+          if (silent) {
+            return true;
+          }
+
+          const shortcodeData = plugin.fromBlock(match);
+
+          try {
+            return eat(match[0])({
+              type: 'shortcode',
+              data: {
+                shortcode: plugin.id,
+                shortcodeData
+              }
+            });
+          } catch (e) {
+            console.warn(
+              `Sent invalid data to remark. Plugin: ${plugin.id}. Value: ${
+                match[0]
+              }. Data: ${JSON.stringify(shortcodeData)}`
+            );
+            return false;
+          }
+        }
+      });
     }
   };
 }

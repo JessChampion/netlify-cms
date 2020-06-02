@@ -52,6 +52,9 @@ function createShortcodeTokenizer({ plugins }) {
               }
             });
           } catch (e) {
+            if (e.message.startsWith('Incorrectly eaten value: ')) {
+              return false; //ignore this message as our changes mean we 'want' to eat it incorrectly
+            }
             console.warn(
               `Sent invalid data to remark. Plugin: ${plugin.id}. Value: ${
                 match[0]

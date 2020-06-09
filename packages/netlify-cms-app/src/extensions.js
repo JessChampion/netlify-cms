@@ -16,7 +16,7 @@ import NetlifyCmsWidgetText from 'netlify-cms-widget-text';
 import NetlifyCmsWidgetImage from 'netlify-cms-widget-image';
 import NetlifyCmsWidgetFile from 'netlify-cms-widget-file';
 import NetlifyCmsWidgetSelect from 'netlify-cms-widget-select';
-import NetlifyCmsWidgetMarkdown from '../../netlify-cms-widget-markdown/dist/netlify-cms-widget-markdown';
+import NetlifyCmsWidgetMarkdown from 'netlify-cms-widget-markdown';
 import NetlifyCmsWidgetList from 'netlify-cms-widget-list';
 import NetlifyCmsWidgetObject from 'netlify-cms-widget-object';
 import NetlifyCmsWidgetRelation from 'netlify-cms-widget-relation';

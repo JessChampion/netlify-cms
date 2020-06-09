@@ -202,6 +202,7 @@ class EditorInterface extends Component {
     const {
       collection,
       entry,
+      globals,
       fields,
       fieldsMetaData,
       fieldsErrors,
@@ -286,6 +287,7 @@ class EditorInterface extends Component {
               <EditorPreviewPane
                 collection={collection}
                 entry={previewEntry}
+                globals={globals}
                 fields={fields}
                 fieldsMetaData={fieldsMetaData}
               />
@@ -397,6 +399,7 @@ class EditorInterface extends Component {
 EditorInterface.propTypes = {
   collection: ImmutablePropTypes.map.isRequired,
   entry: ImmutablePropTypes.map.isRequired,
+  globals: ImmutablePropTypes.map.isRequired,
   fields: ImmutablePropTypes.list.isRequired,
   fieldsMetaData: ImmutablePropTypes.map.isRequired,
   fieldsErrors: ImmutablePropTypes.map.isRequired,

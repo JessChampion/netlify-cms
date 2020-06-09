@@ -34,6 +34,7 @@ import { selectFields } from 'Reducers/collections';
 import { status, EDITORIAL_WORKFLOW } from 'Constants/publishModes';
 import EditorInterface from './EditorInterface';
 import withWorkflow from './withWorkflow';
+import { selectEntries } from '../../reducers';
 import { navigateToCollection, navigateToNewEntry } from '../../routing/history';
 
 export class Editor extends React.Component {
@@ -41,6 +42,8 @@ export class Editor extends React.Component {
     changeDraftField: PropTypes.func.isRequired,
     changeDraftFieldValidation: PropTypes.func.isRequired,
     collection: ImmutablePropTypes.map.isRequired,
+    globalCollections: ImmutablePropTypes.list,
+    globals: ImmutablePropTypes.map.isRequired,
     createDraftDuplicateFromEntry: PropTypes.func.isRequired,
     createEmptyDraft: PropTypes.func.isRequired,
     discardDraft: PropTypes.func.isRequired,
@@ -85,6 +88,7 @@ export class Editor extends React.Component {
     const {
       newEntry,
       collection,
+      globalCollections,
       slug,
       loadEntry,
       createEmptyDraft,
@@ -160,6 +164,7 @@ export class Editor extends React.Component {
 
     if (!collectionEntriesLoaded) {
       loadEntries(collection);
+      globalCollections.forEach(g => loadEntries(g));
     }
   }
 
@@ -351,6 +356,7 @@ export class Editor extends React.Component {
       entry,
       entryDraft,
       fields,
+      globals,
       collection,
       changeDraftFieldValidation,
       user,
@@ -392,6 +398,7 @@ export class Editor extends React.Component {
         draftKey={draftKey}
         entry={entryDraft.get('entry')}
         collection={collection}
+        globals={globals}
         fields={fields}
         fieldsMetaData={entryDraft.get('fieldsMetaData')}
         fieldsErrors={entryDraft.get('fieldsErrors')}
@@ -452,6 +459,20 @@ function mapStateToProps(state, ownProps) {
       editorBackLink = `${editorBackLink}/filter/${pathParts.slice(0, -2).join('/')}`;
     }
   }
+  const globalCollections = collections.filter(c => c.get('global') === true).toArray();
+  const globals = {};
+  globalCollections.forEach((g) => {
+    const selected = selectEntries(state, g);
+    if (selected.size > 0) {
+      const j = selected.toJSON()
+        .map(x => x.data);
+      const newObj = {};
+      j.forEach((config) => {
+        newObj[config.configName] = config.config;
+      });
+      globals[g.get('name')] = newObj;
+    }
+  });
 
   return {
     collection,
@@ -459,6 +480,8 @@ function mapStateToProps(state, ownProps) {
     newEntry,
     entryDraft,
     fields,
+    globalCollections,
+    globals,
     slug,
     entry,
     user,
